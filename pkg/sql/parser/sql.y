@@ -708,6 +708,7 @@ func newNameFromStr(s string) *tree.Name {
 %type <tree.Statement> create_changefeed_stmt
 %type <tree.Statement> create_ddl_stmt
 %type <tree.Statement> create_database_stmt
+%type <tree.Statement> create_extension_stmt
 %type <tree.Statement> create_index_stmt
 %type <tree.Statement> create_role_stmt
 %type <tree.Statement> create_schema_stmt
@@ -2253,7 +2254,18 @@ create_stmt:
 | create_ddl_stmt      // help texts in sub-rule
 | create_stats_stmt    // EXTEND WITH HELP: CREATE STATISTICS
 | create_unsupported   {}
+| create_extension_stmt // EXTENSION: unsupported but need to know
 | CREATE error         // SHOW HELP: CREATE
+
+create_extension_stmt:
+  CREATE EXTENSION IF NOT EXISTS name error
+  {
+    $$.val = &tree.CreateExtension{}
+  }
+| CREATE EXTENSION name error
+  {
+    $$.val = &tree.CreateExtension{}
+  }
 
 create_unsupported:
   CREATE AGGREGATE error { return unimplemented(sqllex, "create aggregate") }
@@ -2261,8 +2273,6 @@ create_unsupported:
 | CREATE CONSTRAINT TRIGGER error { return unimplementedWithIssueDetail(sqllex, 28296, "create constraint") }
 | CREATE CONVERSION error { return unimplemented(sqllex, "create conversion") }
 | CREATE DEFAULT CONVERSION error { return unimplemented(sqllex, "create def conv") }
-| CREATE EXTENSION IF NOT EXISTS name error { return unimplemented(sqllex, "create extension " + $6) }
-| CREATE EXTENSION name error { return unimplemented(sqllex, "create extension " + $3) }
 | CREATE FOREIGN TABLE error { return unimplemented(sqllex, "create foreign table") }
 | CREATE FOREIGN DATA error { return unimplemented(sqllex, "create fdw") }
 | CREATE FUNCTION error { return unimplementedWithIssueDetail(sqllex, 17511, "create function") }

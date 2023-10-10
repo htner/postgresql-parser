@@ -1501,3 +1501,11 @@ func (o *CreateStatsOptions) CombineWith(other *CreateStatsOptions) error {
 	}
 	return nil
 }
+
+// CreateExtension, sdb need to return warning
+type CreateExtension struct {
+}
+
+func (node *CreateExtension) Format(ctx *FmtCtx) {
+	ctx.WriteString("CREATE EXTENSION ")
+}
